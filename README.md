@@ -3,19 +3,19 @@
 Slides que eu programo em **HTML, CSS e JavaScript**, no estilo zoom: a câmera passeia entre os tópicos.
 Quase todos os meus trabalhos viram um projeto assim. Muitos eu monto direto no celular, pelo CodePen.
 
-👉 **[Ver todas as apresentações](https://carolynebeatriz1.github.io/apresentacoes/)**
+👉 **[Ver todas as apresentações](https://carolynebeatriz1.github.io/Apresentacoes/)**
 
-![Página com todas as apresentações](capa.jpg)
+![Apresentações interativas · Carolyne Beatriz](capa.jpg)
 
 | Apresentação | Tema |
 |---|---|
-| [Desconfia](https://carolynebeatriz1.github.io/apresentacoes/desconfia/) | App com IA contra golpes por mensagem (em grupo) |
-| [Painel do Dono](https://carolynebeatriz1.github.io/apresentacoes/painel-do-dono/) | Jogo interativo sobre KPIs: lucratividade e eficácia |
-| [LockBag](https://carolynebeatriz1.github.io/apresentacoes/lockbag/) | Pitch de produto: mochila sem zíper |
-| [Expresso Literário](https://carolynebeatriz1.github.io/apresentacoes/expresso-literario/) | Fidelização de clientes numa livraria com café |
-| [Quem Me Conhece Sabe](https://carolynebeatriz1.github.io/apresentacoes/quem-me-conhece-sabe/) | Plano de gestão de crise de imagem |
-| [Direito de Arrependimento](https://carolynebeatriz1.github.io/apresentacoes/direito-de-arrependimento/) | Art. 49 do Código de Defesa do Consumidor |
-| [Laura Mendes, Atendente Perfeita](https://carolynebeatriz1.github.io/apresentacoes/laura-mendes/) | Qualidades de um bom atendimento |
+| [Desconfia](https://carolynebeatriz1.github.io/Apresentacoes/desconfia/) | App com IA contra golpes por mensagem (em grupo) |
+| [Painel do Dono](https://carolynebeatriz1.github.io/Apresentacoes/painel-do-dono/) | Jogo interativo sobre KPIs: lucratividade e eficácia |
+| [LockBag](https://carolynebeatriz1.github.io/Apresentacoes/lockbag/) | Pitch de produto: mochila sem zíper |
+| [Expresso Literário](https://carolynebeatriz1.github.io/Apresentacoes/expresso-literario/) | Fidelização de clientes numa livraria com café |
+| [Quem Me Conhece Sabe](https://carolynebeatriz1.github.io/Apresentacoes/quem-me-conhece-sabe/) | Plano de gestão de crise de imagem |
+| [Direito de Arrependimento](https://carolynebeatriz1.github.io/Apresentacoes/direito-de-arrependimento/) | Art. 49 do Código de Defesa do Consumidor |
+| [Laura Mendes, Atendente Perfeita](https://carolynebeatriz1.github.io/Apresentacoes/laura-mendes/) | Qualidades de um bom atendimento |
 
 ## Como navegar
 Setas do teclado, clique ou deslize no celular. Cada uma funciona sozinha, é só abrir o `index.html` da pasta.
