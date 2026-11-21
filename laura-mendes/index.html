@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Laura Mendes, Atendente Perfeita</title>
+</head>
+<body style="margin:0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: um "mapa" grande com a Laura no centro e 6 qualidades em volta; a câmera dá zoom de ponto em ponto, estilo Prezi. Visual único escuro, por escolha. */
+:root{
+  --bg:#0e2433; --bg2:#143246; --ink:#f4f1e8; --muted:#a9bccb;
+  --amber:#f2b134; --line:#3b5b72;
+  --c1:#ff8a6b; --c2:#4fd1b5; --c3:#6fb3ff; --c4:#ff6b8b; --c5:#b99bff; --c6:#8fdc6a;
+  --display:"Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --body:"Nunito Sans", "Segoe UI", Arial, sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:radial-gradient(ellipse at 50% 40%,var(--bg2),var(--bg) 70%);background-color:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden;
+  padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+#stage{position:fixed;inset:0;overflow:hidden;cursor:pointer}
+#world{position:absolute;left:0;top:0;width:2400px;height:1350px;transform-origin:0 0;transition:transform 1.3s cubic-bezier(.65,0,.25,1)}
+@media (prefers-reduced-motion:reduce){#world{transition:none}}
+svg text{font-family:var(--body)}
+.ttl{font-family:var(--display);font-weight:800;fill:var(--ink);letter-spacing:-2px}
+.sub{font-weight:600;fill:var(--muted)}
+.amber{fill:var(--amber)}
+.lbl{font-family:var(--display);font-weight:800;fill:var(--ink)}
+.desc{fill:var(--muted);font-size:24px;font-weight:600}
+.conn{fill:none;stroke:var(--line);stroke-width:3;stroke-dasharray:2 12;stroke-linecap:round}
+.node .ring{fill:var(--bg);stroke-width:6}
+.node .ico{fill:none;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.node{transition:opacity .8s}
+body.focus .node:not(.on),body.focus .center:not(.on),body.focus .quote:not(.on){opacity:.25}
+.center,.quote{transition:opacity .8s}
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:14px;background:rgba(8,24,35,.78);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:999px;padding:8px 12px;z-index:5}
+#bar button{background:none;border:0;color:var(--ink);font:700 15px var(--body);padding:8px 12px;border-radius:999px;cursor:pointer}
+#bar button:hover,#bar button:focus-visible{background:var(--bg2);outline:2px solid var(--amber);outline-offset:1px}
+#dots{display:flex;gap:6px}
+#dots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .3s,transform .3s}
+#dots i.on{background:var(--amber);transform:scale(1.3)}
+#hint{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;transition:opacity .6s;pointer-events:none;white-space:nowrap}
+</style>
+
+<div id="stage" aria-label="Apresentação: clique para avançar">
+<div id="world">
+<svg width="2400" height="1350" viewBox="0 0 2400 1350" aria-hidden="false" role="img">
+ <defs>
+  <clipPath id="face"><circle cx="1200" cy="700" r="250"/></clipPath>
+  <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#f2b134" stop-opacity=".22"/><stop offset="1" stop-color="#f2b134" stop-opacity="0"/></radialGradient>
+ </defs>
+
+ <!-- conectores -->
+ <path class="conn" d="M960 640 C 760 520, 640 420, 510 380"/>
+ <path class="conn" d="M950 700 C 800 700, 680 700, 510 700"/>
+ <path class="conn" d="M960 760 C 760 880, 640 980, 510 1060"/>
+ <path class="conn" d="M1440 640 C 1640 520, 1760 420, 1890 380"/>
+ <path class="conn" d="M1450 700 C 1600 700, 1720 700, 1890 700"/>
+ <path class="conn" d="M1440 760 C 1640 880, 1760 980, 1890 1060"/>
+
+ <!-- título -->
+ <g class="center" data-k="center">
+  <text x="1200" y="250" text-anchor="middle" class="ttl" font-size="132">Laura Mendes</text>
+  <text x="1200" y="320" text-anchor="middle" class="sub" font-size="36"><tspan class="amber" font-weight="700">24 anos</tspan>  ·  Atendimento ao Cliente  ·  Empresa de logística</text>
+
+  <!-- avatar -->
+  <circle cx="1200" cy="700" r="330" fill="url(#glow)"/>
+  <circle cx="1200" cy="700" r="258" fill="none" stroke="#f2b134" stroke-width="6"/>
+  <circle cx="1200" cy="700" r="250" fill="#1d4a63"/>
+  <g clip-path="url(#face)">
+   <circle cx="1060" cy="560" r="120" fill="#24597a"/>
+   <circle cx="1350" cy="830" r="160" fill="#205270"/>
+   <!-- cabelo atrás -->
+   <path d="M1078 640 C1060 470 1130 420 1200 420 C1290 420 1345 480 1325 650 L1345 900 L1060 900 Z" fill="#23140f"/>
+   <!-- corpo -->
+   <path d="M990 1000 C1000 860 1080 820 1200 815 C1320 820 1400 860 1410 1000 Z" fill="#f4f1e8"/>
+   <path d="M1015 1000 C1025 880 1090 838 1160 830 L1200 905 L1240 830 C1310 838 1375 880 1385 1000 Z" fill="#203c8f"/>
+   <path d="M1160 830 L1200 905 L1240 830 L1222 826 L1200 868 L1178 826 Z" fill="#f2b134"/>
+   <rect x="1268" y="890" width="62" height="40" rx="7" fill="#f2b134"/>
+   <rect x="1278" y="903" width="42" height="5" rx="2" fill="#203c8f"/>
+   <rect x="1278" y="914" width="28" height="5" rx="2" fill="#203c8f"/>
+   <!-- pescoço -->
+   <path d="M1170 760 L1230 760 L1232 835 C1215 850 1185 850 1168 835 Z" fill="#a8693f"/>
+   <!-- rosto -->
+   <ellipse cx="1200" cy="640" rx="92" ry="112" fill="#bf7d4e"/>
+   <ellipse cx="1108" cy="650" rx="15" ry="24" fill="#a8693f"/>
+   <ellipse cx="1292" cy="650" rx="15" ry="24" fill="#a8693f"/>
+   <!-- franja -->
+   <path d="M1106 625 C1100 520 1150 490 1205 490 C1270 490 1300 530 1296 625 C1270 570 1225 548 1185 556 C1150 566 1125 590 1106 625 Z" fill="#23140f"/>
+   <path d="M1110 615 C1085 700 1090 790 1100 850 L1078 850 C1068 760 1075 680 1110 615 Z" fill="#23140f"/>
+   <path d="M1290 615 C1315 700 1310 790 1300 850 L1322 850 C1332 760 1325 680 1290 615 Z" fill="#23140f"/>
+   <!-- olhos -->
+   <path d="M1150 638 C1160 628 1176 628 1186 638" stroke="#23140f" stroke-width="7" fill="none" stroke-linecap="round"/>
+   <path d="M1214 638 C1224 628 1240 628 1250 638" stroke="#23140f" stroke-width="7" fill="none" stroke-linecap="round"/>
+   <path d="M1146 612 C1160 602 1178 602 1190 608" stroke="#23140f" stroke-width="5" fill="none" stroke-linecap="round"/>
+   <path d="M1210 608 C1222 602 1240 602 1254 612" stroke="#23140f" stroke-width="5" fill="none" stroke-linecap="round"/>
+   <ellipse cx="1146" cy="672" rx="17" ry="9" fill="#e0785f" opacity=".5"/>
+   <ellipse cx="1254" cy="672" rx="17" ry="9" fill="#e0785f" opacity=".5"/>
+   <path d="M1198 650 C1194 668 1196 676 1204 678" stroke="#8e5532" stroke-width="4" fill="none" stroke-linecap="round"/>
+   <path d="M1166 700 C1185 722 1215 722 1234 700 C1215 708 1185 708 1166 700 Z" fill="#fff" stroke="#7a2e1f" stroke-width="4" stroke-linejoin="round"/>
+   <!-- headset -->
+   <path d="M1098 640 C1090 500 1150 455 1200 455 C1250 455 1310 500 1302 640" stroke="#11202b" stroke-width="13" fill="none" stroke-linecap="round"/>
+   <rect x="1080" y="618" width="34" height="62" rx="15" fill="#11202b"/>
+   <rect x="1286" y="618" width="34" height="62" rx="15" fill="#11202b"/>
+   <path d="M1098 676 C1100 720 1130 735 1160 728" stroke="#11202b" stroke-width="7" fill="none" stroke-linecap="round"/>
+   <circle cx="1166" cy="727" r="10" fill="#f2b134"/>
+  </g>
+ </g>
+
+ <!-- nós -->
+ <g class="node" data-k="n1" transform="translate(420 380)">
+  <circle class="ring" r="90" stroke="var(--c1)"/>
+  <g class="ico" transform="scale(.8)" stroke="var(--c1)"><circle r="46"/><path d="M-22 10 C-12 30 12 30 22 10"/><path d="M-18 -14 L-18 -10 M18 -14 L18 -10"/></g>
+  <text y="145" text-anchor="middle" class="lbl" font-size="46">Simpatia</text>
+  <text y="190" text-anchor="middle" class="desc">Recebe o cliente com sorriso e educação.</text>
+  <text y="222" text-anchor="middle" class="desc">O primeiro contato já acalma.</text>
+ </g>
+ <g class="node" data-k="n2" transform="translate(420 700)">
+  <circle class="ring" r="90" stroke="var(--c2)"/>
+  <g class="ico" transform="scale(.8)" stroke="var(--c2)"><path d="M-14 30 C-40 30 -40 -40 0 -44 C34 -46 40 -10 24 6 C14 16 14 30 -2 40"/><path d="M-6 -12 C4 -20 16 -10 8 0"/><path d="M50 -24 C62 -8 62 12 50 28"/></g>
+  <text y="145" text-anchor="middle" class="lbl" font-size="46">Escuta ativa</text>
+  <text y="190" text-anchor="middle" class="desc">Ouve o cliente até o fim, sem interromper,</text>
+  <text y="222" text-anchor="middle" class="desc">pra entender o problema de verdade.</text>
+ </g>
+ <g class="node" data-k="n3" transform="translate(420 1060)">
+  <circle class="ring" r="90" stroke="var(--c3)"/>
+  <g class="ico" transform="scale(.8)" stroke="var(--c3)"><path d="M-48 -34 H48 V22 H-6 L-30 42 V22 H-48 Z"/><path d="M-26 -10 H26 M-26 6 H10"/></g>
+  <text y="145" text-anchor="middle" class="lbl" font-size="46">Comunicação clara</text>
+  <text y="190" text-anchor="middle" class="desc">Explica o status da entrega de um jeito</text>
+  <text y="222" text-anchor="middle" class="desc">simples, sem termos difíceis.</text>
+ </g>
+ <g class="node" data-k="n4" transform="translate(1980 380)">
+  <circle class="ring" r="90" stroke="var(--c4)"/>
+  <g class="ico" transform="scale(.8)" stroke="var(--c4)"><path d="M0 40 C-60 0 -52 -42 -26 -42 C-12 -42 -4 -32 0 -22 C4 -32 12 -42 26 -42 C52 -42 60 0 0 40 Z"/></g>
+  <text y="145" text-anchor="middle" class="lbl" font-size="46">Empatia</text>
+  <text y="190" text-anchor="middle" class="desc">Se coloca no lugar do cliente e trata</text>
+  <text y="222" text-anchor="middle" class="desc">ele como pessoa, não como problema.</text>
+ </g>
+ <g class="node" data-k="n5" transform="translate(1980 700)">
+  <circle class="ring" r="90" stroke="var(--c5)"/>
+  <g class="ico" transform="scale(.8)" stroke="var(--c5)"><path d="M-32 -46 H32 M-32 46 H32"/><path d="M-26 -46 C-26 -10 26 -10 26 -46 M-26 46 C-26 10 26 10 26 46"/><path d="M-26 -46 C-26 -14 0 -6 0 0 C0 6 -26 14 -26 46 M26 -46 C26 -14 0 -6 0 0 C0 6 26 14 26 46"/></g>
+  <text y="145" text-anchor="middle" class="lbl" font-size="46">Paciência</text>
+  <text y="190" text-anchor="middle" class="desc">Mantém a calma mesmo quando o cliente</text>
+  <text y="222" text-anchor="middle" class="desc">chega nervoso com a encomenda atrasada.</text>
+ </g>
+ <g class="node" data-k="n6" transform="translate(1980 1060)">
+  <circle class="ring" r="90" stroke="var(--c6)"/>
+  <g class="ico" transform="scale(.8)" stroke="var(--c6)"><circle r="46"/><path d="M-20 0 L-4 16 L22 -14"/></g>
+  <text y="145" text-anchor="middle" class="lbl" font-size="46">Resolve o problema</text>
+  <text y="190" text-anchor="middle" class="desc">Vai até o fim e não fica passando</text>
+  <text y="222" text-anchor="middle" class="desc">o cliente de setor em setor.</text>
+ </g>
+
+ <!-- frase final -->
+ <g class="quote" data-k="quote">
+  <text x="1200" y="1150" text-anchor="middle" class="lbl" font-size="46"><tspan class="amber">“</tspan>Quem paga o salário do trabalhador é o cliente.<tspan class="amber">”</tspan></text>
+  <text x="1200" y="1200" text-anchor="middle" class="sub" font-size="26">Henry Ford</text>
+ </g>
+</svg>
+</div>
+</div>
+<div id="hint">Toque ou use as setas para avançar</div>
+<nav id="bar" aria-label="Navegação">
+ <button id="prev" aria-label="Voltar">‹ Voltar</button>
+ <div id="dots"></div>
+ <button id="next" aria-label="Avançar">Avançar ›</button>
+ <button id="fs" aria-label="Tela cheia">⛶</button>
+</nav>
+
+<script>
+(function(){
+ const W=2400,H=1350;
+ // cada passo: centro (x,y), largura da área visível, rotação, elemento em destaque
+ const steps=[
+  {x:1200,y:675,w:2400,r:0,k:null},
+  {x:1200,y:600,w:1150,r:0,k:'center'},
+  {x:420,y:450,w:720,r:-4,k:'n1'},
+  {x:420,y:790,w:720,r:3,k:'n2'},
+  {x:420,y:1130,w:720,r:-3,k:'n3'},
+  {x:1980,y:450,w:720,r:4,k:'n4'},
+  {x:1980,y:790,w:720,r:-3,k:'n5'},
+  {x:1980,y:1130,w:720,r:3,k:'n6'},
+  {x:1200,y:1165,w:1350,r:0,k:'quote'},
+  {x:1200,y:675,w:2400,r:0,k:null}
+ ];
+ const world=document.getElementById('world'),dots=document.getElementById('dots');
+ steps.forEach(()=>dots.appendChild(document.createElement('i')));
+ let i=0;
+ function go(n){
+  i=Math.max(0,Math.min(steps.length-1,n));
+  const s=steps[i],vw=innerWidth,vh=innerHeight-70;
+  const h=s.w*H/W*(s.k?1.05:1);
+  const sc=Math.min(vw/s.w,vh/h)*0.94;
+  const rad=s.r*Math.PI/180,c=Math.cos(rad),sn=Math.sin(rad);
+  // rotaciona e escala em torno de (x,y), depois leva o ponto ao centro da tela
+  const tx=vw/2-sc*(c*s.x-sn*s.y), ty=vh/2-sc*(sn*s.x+c*s.y);
+  world.style.transform=`matrix(${sc*c},${sc*sn},${-sc*sn},${sc*c},${tx},${ty})`;
+  document.body.classList.toggle('focus',!!s.k);
+  document.querySelectorAll('[data-k]').forEach(g=>g.classList.toggle('on',g.dataset.k===s.k));
+  [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===i));
+  if(i>0)document.getElementById('hint').style.opacity=0;
+ }
+ document.getElementById('next').onclick=e=>{e.stopPropagation();go(i+1)};
+ document.getElementById('prev').onclick=e=>{e.stopPropagation();go(i-1)};
+ document.getElementById('fs').onclick=e=>{e.stopPropagation();try{const p=document.documentElement.requestFullscreen?.();p&&p.catch(()=>{})}catch(_){}};
+ document.getElementById('stage').addEventListener('click',e=>{ if(e.clientX<innerWidth*0.3)go(i-1); else go(i+1); });
+ addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();go(i+1)}
+  if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();go(i-1)}
+  if(e.key==='Home')go(0);
+ });
+ let sx=null;
+ addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+ addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50){go(dx<0?i+1:i-1);sx=null;}},{passive:true});
+ addEventListener('resize',()=>go(i));
+ world.style.transition='none';go(0);requestAnimationFrame(()=>requestAnimationFrame(()=>world.style.transition=''));
+})();
+</script>
+
+</body>
+</html>

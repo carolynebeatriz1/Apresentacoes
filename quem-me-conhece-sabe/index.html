@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Quem Me Conhece Sabe</title>
+</head>
+<body style="margin:0">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: um caminho horizontal da crise (esquerda, em vermelho) até a reparação (direita); a câmera dá zoom em cada etapa, estilo Prezi. Visual único claro, por escolha. */
+:root{
+  --bg:#eef1f4; --panel:#ffffff; --panel2:#f1f3f6; --ink:#16191d; --muted:#4f5864; --line:#cdd3da;
+  --alert:#d42f35; --alert-soft:#fdeced; --calm:#23845a; --calm-soft:#e4f3eb; --hl:#d08b00;
+  --display:"Archivo Black","Arial Black",Impact,sans-serif;
+  --body:"Source Sans 3","Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden}
+#stage{position:fixed;inset:0;overflow:hidden;cursor:pointer}
+#world{position:absolute;left:0;top:0;width:3000px;height:1650px;transform-origin:0 0;transition:transform 1.3s cubic-bezier(.65,0,.25,1)}
+@media (prefers-reduced-motion:reduce){#world{transition:none}}
+.abs{position:absolute}
+.dim{transition:opacity .8s}
+body.focus .dim:not(.on){opacity:.15}
+
+/* título */
+#title{left:120px;top:90px;width:2760px}
+#title .eyebrow{font:700 30px var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--hl)}
+#title h1{font:400 130px/1 var(--display);margin:14px 0 18px;letter-spacing:-1px}
+#title p{font:600 40px var(--body);color:var(--muted);margin:0}
+#title p b{color:var(--alert)}
+
+/* caminho */
+#path{left:0;top:0;pointer-events:none}
+
+/* painéis */
+.panel{width:500px;background:var(--panel);border:2px solid var(--line);box-shadow:0 8px 30px rgba(20,30,40,.08);border-radius:18px;padding:34px 34px 38px}
+.step{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.num{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font:400 30px var(--display);background:var(--ink);color:#fff;flex:none}
+.panel h2{font:400 40px/1.05 var(--display);margin:0;text-wrap:balance}
+.panel ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:16px}
+.panel li{font:600 25px/1.3 var(--body);color:var(--ink);padding-left:28px;position:relative}
+.panel li::before{content:"";position:absolute;left:0;top:12px;width:12px;height:12px;border-radius:3px;background:var(--hl)}
+
+/* o caso */
+#caso{left:120px;top:470px;width:600px;background:var(--alert-soft);border-color:var(--alert)}
+#caso .tag{display:inline-block;font:700 20px var(--body);letter-spacing:.14em;text-transform:uppercase;background:var(--alert);color:#fff;border-radius:6px;padding:6px 12px;margin-bottom:18px}
+.video{height:250px;border-radius:12px;background:linear-gradient(135deg,#2a2e35,#16181c);position:relative;display:grid;place-items:center;margin-bottom:20px}
+.play{width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center}
+.play::after{content:"";border-left:30px solid #fff;border-top:18px solid transparent;border-bottom:18px solid transparent;margin-left:8px}
+.views{position:absolute;left:16px;top:14px;text-shadow:0 1px 4px rgba(0,0,0,.6);font:700 22px var(--body);color:#fff}
+.live{position:absolute;right:16px;top:14px;font:700 18px var(--body);color:#fff;background:var(--alert);padding:4px 10px;border-radius:5px;letter-spacing:.08em}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}
+.chip{font:600 21px var(--body);background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:8px 16px}
+.chip.r{border-color:var(--alert);color:var(--alert)}
+.nota{background:var(--panel2);border-radius:10px;padding:16px 20px;font:600 23px/1.35 var(--body);color:var(--muted);position:relative}
+.nota s{color:var(--ink);text-decoration-color:var(--alert);text-decoration-thickness:4px}
+.nota small{display:block;font-size:18px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+
+/* bolhas de comentários */
+.bubble{font:700 24px var(--body);background:var(--panel2);border:2px solid var(--alert);color:var(--alert);background:#fff;border-radius:16px 16px 16px 4px;padding:10px 18px;white-space:nowrap}
+
+.acts{display:flex;flex-direction:column;gap:12px}
+.acts div{font:600 23px/1.3 var(--body);background:var(--panel2);border-radius:10px;padding:12px 16px}
+.acts b{display:block;font:700 17px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--hl);margin-bottom:2px}
+/* reposicionamento */
+.ba{display:grid;grid-template-columns:1fr;gap:14px}
+.ba div{border-radius:12px;padding:16px 18px;font:600 24px/1.3 var(--body)}
+.ba .antes{background:var(--alert-soft);border:1px solid var(--alert)}
+.ba .depois{background:var(--calm-soft);border:1px solid var(--calm)}
+.ba small{display:block;font:700 17px var(--body);letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;color:var(--muted)}
+.arrow{text-align:center;font:400 34px var(--display);color:var(--muted)}
+
+/* celular */
+#phone{left:2380px;top:380px;width:470px;height:930px;border-radius:56px;background:#000;border:3px solid #4a515c;padding:18px;box-shadow:0 30px 60px rgba(20,30,40,.25)}
+.screen{width:100%;height:100%;border-radius:40px;background:#fff;color:#111;overflow:hidden;display:flex;flex-direction:column}
+.ph-top{display:flex;align-items:center;gap:12px;padding:30px 20px 14px}
+.av{width:48px;height:48px;border-radius:50%;background:#2b2f36;color:#fff;display:grid;place-items:center;font:700 18px var(--body)}
+.who b{display:block;font:700 19px var(--body)}
+.who span{font:400 15px var(--body);color:#666}
+.post{aspect-ratio:4/5;background:#fff;color:#1a1a1a;padding:22px 26px 18px;display:flex;flex-direction:column;border-bottom:1px solid #e6e6e6;border-top:6px solid #16191d}
+.post .hd{text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #16191d}
+.post .hd strong{display:block;font:400 34px/1 var(--display);letter-spacing:.04em;color:#16191d}
+.post .hd span{display:block;margin-top:6px;font:700 10.5px var(--body);letter-spacing:.2em;text-transform:uppercase;color:#777}
+.post h3{font:400 17px/1.15 var(--display);margin:0 0 8px}
+.post p{font:400 13px/1.42 var(--body);margin:0 0 8px}
+.post p.lead{font:700 13.6px/1.35 var(--body)}
+.post ul{margin:0 0 7px;padding-left:16px;font:400 13px/1.42 var(--body)}
+.post .sig{margin-top:auto;padding-top:6px;border-top:1px solid #e3e3e3;display:flex;justify-content:space-between;align-items:baseline}
+.post .sig b{font:italic 700 16px var(--body)}
+.post .sig span{font:400 11px var(--body);color:#777}
+.icons{display:flex;gap:16px;padding:12px 18px 4px;font:700 22px var(--body)}
+.cap{padding:2px 18px 10px;font:400 15px/1.4 var(--body);color:#222}
+.likes{padding:2px 18px 4px;font:700 15px var(--body);color:#111}
+.more{padding:0 18px;font:400 14px var(--body);color:#888}
+.cap b{font-weight:700}
+#phoneLbl{left:2380px;top:300px;width:470px}
+
+/* final */
+#fim{left:2120px;top:1380px;width:800px;text-align:center}
+#fim p{font:400 54px/1.1 var(--display);margin:0}
+#fim p span{color:var(--calm)}
+#fim small{display:block;margin-top:14px;font:600 28px var(--body);color:var(--muted)}
+
+#bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:999px;padding:8px 12px;z-index:5}
+#bar button{white-space:nowrap;background:none;border:0;color:var(--ink);font:700 15px var(--body);padding:8px 12px;border-radius:999px;cursor:pointer}
+#bar button:hover,#bar button:focus-visible{background:var(--panel2);outline:2px solid var(--hl);outline-offset:1px}
+#dots{display:flex;gap:6px}
+#dots i{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .3s,transform .3s}
+#dots i.on{background:var(--hl);transform:scale(1.3)}
+</style>
+
+<div id="stage" aria-label="Apresentação: clique para avançar">
+<div id="world">
+
+ <svg id="path" class="abs" width="3000" height="1500" viewBox="0 0 3000 1500" aria-hidden="true">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#e5484d"/><stop offset=".55" stop-color="#f5c451"/><stop offset="1" stop-color="#46a77a"/></linearGradient></defs>
+  <path d="M720 800 C 800 800, 820 760, 900 760 M1400 760 C 1450 760, 1460 800, 1510 800 M2010 800 C 2060 800, 2070 760, 2120 760 M2140 760 C 2250 760, 2280 820, 2380 820" fill="none" stroke="url(#g)" stroke-width="6" stroke-dasharray="4 16" stroke-linecap="round"/>
+ </svg>
+
+ <div id="title" class="abs dim" data-k="title">
+  <h1>Quem me conhece sabe...</h1>
+  <p>Caso: <b>atitude racista em evento público</b> · Plano de gestão de crise</p>
+ </div>
+
+ <div class="abs dim bubble" data-k="caso" style="left:640px;top:410px;transform:rotate(4deg)">isso é racismo sim</div>
+ <div class="abs dim bubble nofit" data-k="caso" style="left:110px;top:1300px;transform:rotate(-3deg)">#LucasCancelado</div>
+ <div class="abs dim bubble nofit" data-k="caso" style="left:470px;top:1340px;transform:rotate(2deg)">"mal interpretado"?? 🙄</div>
+
+ <div id="caso" class="abs panel dim" data-k="caso">
+  <span class="tag">A crise</span>
+  <div class="video">
+   <svg viewBox="0 0 532 250" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;border-radius:12px">
+    <defs>
+     <radialGradient id="spot" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#fff3c4" stop-opacity=".55"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></radialGradient>
+     <linearGradient id="stg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c2140"/><stop offset="1" stop-color="#120e1c"/></linearGradient>
+    </defs>
+    <rect width="532" height="250" fill="url(#stg)"/>
+    <polygon points="200,0 332,0 400,210 132,210" fill="url(#spot)"/>
+    <g fill="#ff5fa2" opacity=".55"><circle cx="40" cy="30" r="5"/><circle cx="90" cy="18" r="4"/><circle cx="450" cy="24" r="5"/><circle cx="500" cy="40" r="4"/></g>
+    <g fill="#5fd0ff" opacity=".5"><circle cx="140" cy="40" r="4"/><circle cx="400" cy="46" r="4"/></g>
+    <rect x="0" y="200" width="532" height="50" fill="#0b0912"/>
+    <g fill="#1b1626"><circle cx="40" cy="232" r="26"/><circle cx="100" cy="238" r="24"/><circle cx="430" cy="236" r="25"/><circle cx="492" cy="232" r="27"/><circle cx="160" cy="242" r="22"/><circle cx="372" cy="242" r="22"/></g>
+    <g transform="translate(266 92)">
+     <circle cx="0" cy="0" r="26" fill="#0d0a14"/>
+     <path d="M-24 -8 C-22 -32 22 -34 25 -8 C14 -18 -12 -20 -24 -8Z" fill="#0d0a14"/>
+     <path d="M-52 120 C-50 60 -30 38 0 36 C30 38 50 60 52 120Z" fill="#0d0a14"/>
+     <path d="M-20 36 L0 62 L20 36" fill="#0d0a14"/>
+     <path d="M30 60 C 40 40 30 28 22 22" stroke="#0d0a14" stroke-width="10" fill="none" stroke-linecap="round"/>
+     <rect x="14" y="10" width="12" height="20" rx="6" fill="#222" transform="rotate(-25 20 20)"/>
+    </g>
+    <rect x="126" y="170" width="280" height="24" rx="5" fill="#d42f35"/>
+    <text x="266" y="187" text-anchor="middle" font-family="Source Sans 3, Arial, sans-serif" font-size="15" font-weight="700" fill="#fff">[ comentário racista censurado ]</text>
+    <rect x="16" y="236" width="500" height="4" rx="2" fill="rgba(255,255,255,.25)"/>
+    <rect x="16" y="236" width="210" height="4" rx="2" fill="#e5484d"/>
+    <circle cx="226" cy="238" r="6" fill="#e5484d"/>
+   </svg>
+   <span class="live">Viralizou</span><span class="views">2,3 mi visualizações · 0:42</span></div>
+  <div class="chips"><span class="chip r">Público revoltado</span><span class="chip r">3 marcas encerraram parceria</span><span class="chip">Influenciador Lucas Viana</span></div>
+  <div class="nota"><small>Nota que ele publicou</small><s>"Fui mal interpretado."</s><br>Esse foi o segundo erro.</div>
+ </div>
+
+ <div id="p1" class="abs panel dim" data-k="p1" style="left:900px;top:470px">
+  <div class="step"><span class="num">1</span><h2>Conter os danos</h2></div>
+  <ul>
+   <li>Apagar a nota do "fui mal interpretado"</li>
+   <li>Contratar uma assessoria de gestão de crise</li>
+   <li>Sumir das redes e pausar as publis por um tempo</li>
+   <li>Não bloquear nem rebater quem critica</li>
+   <li>Gravar um vídeo de desculpas assumindo: foi racismo</li>
+  </ul>
+ </div>
+
+ <div id="p2" class="abs panel dim" data-k="p2" style="left:1510px;top:470px">
+  <div class="step"><span class="num">2</span><h2>Ações que mostram mudança</h2></div>
+  <div class="acts">
+   <div><b>Reparação</b>Encontra a pessoa atingida pra pedir desculpas pessoalmente</div>
+   <div><b>Ação social</b>Doação pra Educafro, uma ONG antirracista</div>
+   <div><b>Retorno</b>Volta às redes aos poucos, com um vídeo contando o que fez nesse tempo</div>
+   <div><b>Justiça</b>Racismo é crime no Brasil. Ele responde e colabora com a investigação</div>
+  </div>
+ </div>
+
+ <div id="p3" class="abs panel dim" data-k="p3" style="left:900px;top:1210px;width:1110px;display:flex;gap:30px;align-items:center">
+  <div style="flex:none;width:260px"><div class="step" style="margin:0"><span class="num">3</span><h2>Reposi&shy;cionar a imagem</h2></div></div>
+  <div class="ba" style="flex:1">
+   <div class="antes"><small>Antes</small>Fala o que quer e não pensa no impacto</div>
+   <div class="depois"><small>Depois</small>Errou, assumiu e está aprendendo, com atitude e com o tempo</div>
+  </div>
+ </div>
+
+ <div id="phoneLbl" class="abs dim" data-k="post"><div class="step"><span class="num">4</span><h2 style="font:400 40px var(--display);margin:0">Postagem oficial</h2></div></div>
+ <div id="phone" class="abs dim" data-k="post">
+  <div class="screen">
+   <div class="ph-top"><div class="av">LV</div><div class="who"><b>lucasviana</b><span>Post fixado</span></div></div>
+   <div class="post">
+    <div class="hd"><strong>NOTA OFICIAL</strong><span>16 de outubro de 2026</span></div>
+    <h3>Eu errei. E não vou me esconder disso.</h3>
+    <p class="lead">No último sábado, durante um evento, eu fiz comentários racistas. Não fui mal interpretado, como disse na primeira nota.</p>
+    <p>Passei os últimos dias lendo cada mensagem, inclusive as mais duras, e vocês têm razão. Minhas palavras machucaram pessoas reais. Racismo não é opinião nem brincadeira. É crime.</p>
+    <p>Peço desculpas primeiro a quem estava lá e foi atingido. Já procurei essas pessoas pra pedir perdão pessoalmente. E peço desculpas a cada pessoa negra que confiava em mim.</p>
+    <p>Só pedir desculpas não basta. Por isso:</p>
+    <ul><li>vou me afastar das redes e das publicidades por um tempo;</li><li>farei uma doação para a Educafro, que luta contra o racismo há anos;</li><li>estou à disposição da Justiça.</li></ul>
+    <p>Não peço que me perdoem agora. Peço a chance de provar, com atitude, que eu aprendi.</p>
+    <div class="sig"><b>Lucas Viana</b><span>@lucasviana</span></div>
+   </div>
+   <div class="icons">♡ &nbsp;💬 &nbsp;↗</div>
+   <div class="likes">48,2 mil curtidas</div>
+   <div class="cap"><b>lucasviana</b> Li cada comentário. Vocês estão certos e eu errei. Não vou fechar os comentários, porque eu preciso ouvir.</div>
+   <div class="more">Ver todos os 12 mil comentários</div>
+  </div>
+ </div>
+
+ <div id="fim" class="abs dim" data-k="fim">
+  <p>O que recupera a confiança é <span>atitude</span>, não nota bonita.</p>
+ </div>
+</div>
+</div>
+
+<nav id="bar" aria-label="Navegação">
+ <button id="prev" aria-label="Voltar">‹ Voltar</button>
+ <div id="dots"></div>
+ <button id="next" aria-label="Avançar">Avançar ›</button>
+ <button id="fs" aria-label="Tela cheia">⛶</button>
+</nav>
+
+<script>
+(function(){
+ const W=3000,H=1650;
+ const steps=[null,'title','caso','p1','p2','p3','post','fim',null];
+ const tilt={caso:-2,p1:1.5,p2:-1.5,p3:1.5,post:-2};
+ function box(k){
+  if(!k)return {x:0,y:0,w:W,h:H};
+  let x1=1e9,y1=1e9,x2=-1e9,y2=-1e9;
+  document.querySelectorAll('[data-k="'+k+'"]:not(.nofit)').forEach(el=>{x1=Math.min(x1,el.offsetLeft);y1=Math.min(y1,el.offsetTop);x2=Math.max(x2,el.offsetLeft+el.offsetWidth);y2=Math.max(y2,el.offsetTop+el.offsetHeight);});
+  return {x:x1,y:y1,w:x2-x1,h:y2-y1};
+ }
+ const world=document.getElementById('world'),dots=document.getElementById('dots');
+ steps.forEach(()=>dots.appendChild(document.createElement('i')));
+ let i=0;
+ function go(n){
+  i=Math.max(0,Math.min(steps.length-1,n));
+  const k=steps[i],b=box(k),vw=innerWidth,vh=innerHeight-80;
+  const s={x:b.x+b.w/2,y:b.y+b.h/2,r:k?(tilt[k]||0):0,k};
+  const pad=k?40:0;
+  const sc=Math.min(vw/(b.w+pad*2),vh/(b.h+pad*2))*(k?0.96:0.95);
+  const rad=s.r*Math.PI/180,c=Math.cos(rad),sn=Math.sin(rad);
+  const tx=vw/2-sc*(c*s.x-sn*s.y), ty=vh/2-sc*(sn*s.x+c*s.y);
+  world.style.transform=`matrix(${sc*c},${sc*sn},${-sc*sn},${sc*c},${tx},${ty})`;
+  document.body.classList.toggle('focus',!!s.k);
+  document.querySelectorAll('[data-k]').forEach(g=>g.classList.toggle('on',g.dataset.k===s.k));
+  [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===i));
+ }
+ document.getElementById('next').onclick=e=>{e.stopPropagation();go(i+1)};
+ document.getElementById('prev').onclick=e=>{e.stopPropagation();go(i-1)};
+ document.getElementById('fs').onclick=e=>{e.stopPropagation();try{const p=document.documentElement.requestFullscreen?.();p&&p.catch(()=>{})}catch(_){}};
+ document.getElementById('stage').addEventListener('click',e=>{ if(e.clientX<innerWidth*0.3)go(i-1); else go(i+1); });
+ addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();go(i+1)}
+  if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();go(i-1)}
+  if(e.key==='Home')go(0);
+ });
+ let sx=null;
+ addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+ addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50){go(dx<0?i+1:i-1);sx=null;}},{passive:true});
+ addEventListener('resize',()=>go(i));
+ world.style.transition='none';go(0);requestAnimationFrame(()=>requestAnimationFrame(()=>world.style.transition=''));
+})();
+</script>
+
+</body>
+</html>

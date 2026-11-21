@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Painel do Dono</title>
+</head>
+<body style="margin:0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: one projector screen at a time, like the instrument panel of a car at night; two gauges are the stars */
+:root{
+  --bg:#2A1A12; --panel:#3A261B; --line:#5A3E2D;
+  --ink:#F6EBDD; --muted:#EADCCB;
+  --luc:#E8B96A; --efi:#7EC8C0; --bad:#FF7A6B; --good:#5FDCA0;
+  --display:'Bricolage Grotesque', 'Trebuchet MS', sans-serif;
+  --body:'Atkinson Hyperlegible', Verdana, sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:clamp(18px,2.1vw,32px);line-height:1.4;font-weight:700;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  background-image:radial-gradient(ellipse at 50% 120%, #4A2F20 0%, transparent 60%);}
+.app{max-width:1600px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-block:20px 16px;gap:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:800;letter-spacing:.02em;font-size:1rem;color:var(--muted)}
+.brand b{color:var(--ink)}
+.steps{display:flex;gap:6px}
+.steps i{width:28px;height:6px;border-radius:3px;background:var(--line);display:block}
+.steps i.on{background:var(--luc)}
+main{flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;min-width:0}
+h1,h2,h3{font-family:var(--display);font-weight:800;line-height:1.05;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.6rem,7vw,5.6rem)}
+h2{font-size:clamp(1.9rem,4.4vw,3.4rem)}
+h3{font-size:clamp(1.2rem,2.2vw,1.6rem)}
+p{margin:0;max-width:62ch}
+.eyebrow{font-size:1rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--luc)}
+.lead{font-size:1.2em;color:var(--ink)}
+.luc{color:var(--luc)} .efi{color:var(--efi)}
+.row{display:flex;gap:20px;flex-wrap:wrap}
+.row>*{flex:1 1 280px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:10px}
+.formula{font-family:var(--display);font-weight:500;font-size:1.05em;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 0}
+.frac{display:inline-flex;flex-direction:column;align-items:center;text-align:center}
+.frac span:first-child{border-bottom:2px solid currentColor;padding:0 6px 4px}
+.frac span:last-child{padding:4px 6px 0}
+.example{font-size:.95em;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.example b{color:var(--ink)}
+
+/* gauges */
+.gauges{display:flex;gap:20px;flex-wrap:wrap}
+.gauge{flex:1 1 240px;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px 18px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.gauge svg{width:100%;max-width:300px;height:auto;display:block}
+.gauge .track{fill:none;stroke:var(--line);stroke-width:16;stroke-linecap:round}
+.gauge .fill{fill:none;stroke-width:16;stroke-linecap:round;transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+.gauge .tick{stroke:var(--ink);stroke-width:3}
+.gauge .val{font-family:var(--display);font-weight:800;font-size:clamp(2rem,4.5vw,3.2rem);line-height:1;font-variant-numeric:tabular-nums;margin-top:-28px}
+.gauge .lbl{font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:1rem;color:var(--ink)}
+.gauge .sub{font-size:1rem;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+
+/* game */
+.scenario{display:flex;flex-direction:column;gap:10px}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.choices{grid-template-columns:1fr}}
+.choice{all:unset;box-sizing:border-box;cursor:pointer;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;transition:transform .15s, border-color .15s}
+.choice:hover{transform:translateY(-3px);border-color:var(--luc)}
+.choice:focus-visible{outline:3px solid var(--efi);outline-offset:3px}
+.choice .key{font-family:var(--display);font-weight:800;font-size:1.6rem;color:var(--luc);line-height:1}
+.choice .t{font-weight:700;font-size:1.05em}
+.choice .d{color:var(--muted);font-size:1em}
+.result{display:grid;grid-template-columns:1.1fr 1fr;gap:20px}
+@media (max-width:860px){.result{grid-template-columns:1fr}}
+.month{display:flex;flex-direction:column;gap:12px}
+.money{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.money div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.money small{display:block;color:var(--muted);font-size:1rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.money strong{font-family:var(--display);font-size:1.4rem;font-variant-numeric:tabular-nums}
+.bar{display:flex;height:52px;border-radius:8px;overflow:hidden;background:var(--line)}
+.bar .c{background:#A08670;display:flex;align-items:center;padding-left:10px;font-size:1rem;font-weight:700;color:#2A1A12;white-space:nowrap;overflow:hidden}
+.bar .l{background:var(--luc);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#2A1A12;white-space:nowrap;overflow:hidden}
+.bar .l.neg{background:var(--bad)}
+.lesson{border-left:4px solid var(--luc);padding:6px 0 6px 14px;font-size:1.02em}
+.picked{font-size:1.05rem;color:var(--muted)}
+
+/* final */
+.verdict{display:flex;flex-direction:column;gap:8px}
+.badge{align-self:flex-start;font-weight:700;font-size:.85rem;padding:6px 12px;border-radius:999px;background:var(--panel);border:1px solid var(--line)}
+.matrix{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.matrix div{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:1em;color:var(--muted)}
+.matrix div b{display:block;color:var(--ink);font-size:1.05em}
+.matrix div.me{border-color:var(--luc);color:var(--ink);background:#4E3324}
+.chart{display:flex;gap:18px;align-items:flex-end;height:200px;padding:10px 4px 0;border-bottom:1px solid var(--line)}
+.chart .m{flex:1;display:flex;gap:6px;align-items:flex-end;height:100%;min-width:0}
+.chart .b{flex:1;border-radius:6px 6px 0 0;position:relative;min-height:4px;transition:height .9s ease}
+.chart .rec{background:var(--efi)} .chart .luc{background:var(--luc)}
+.chart .b span{position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:1rem;font-weight:700;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chart-x{display:flex;gap:18px;font-size:1rem;color:var(--muted);padding:6px 4px 0}
+.chart-x span{flex:1;text-align:center}
+.legend{display:flex;gap:16px;font-size:1rem;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+.real{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.real{grid-template-columns:1fr}}
+.real .card .tag{font-size:1rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+
+/* nav + notes */
+footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;font-weight:700;padding:12px 22px;border-radius:999px;background:var(--luc);color:#2A1A12;font-size:1rem}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn:focus-visible{outline:3px solid var(--efi);outline-offset:3px}
+.btn[disabled]{opacity:.35;cursor:default}
+.hint{font-size:1rem;color:var(--muted)}
+.notes{background:#1F130D;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:.95rem;color:var(--ink)}
+.notes .eyebrow{color:var(--efi);display:block;margin-bottom:4px}
+.step{transition:opacity .45s ease, transform .45s ease}
+.step:not(.shown){display:none}
+.step.shown{animation:in .45s ease both}
+@media (min-width:900px){.step:not(.shown){display:flex;visibility:hidden;opacity:0}}
+.fade{animation:in .45s ease both}
+@keyframes in{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}.gauge .fill,.chart .b{transition:none}.choice{transition:none}}
+</style>
+
+<div class="app">
+  <header>
+    <div class="brand"><b>Painel do Dono</b> · Lucratividade e Eficácia</div>
+    <div class="steps" id="steps" aria-hidden="true"></div>
+  </header>
+  <main id="screen" aria-live="polite"></main>
+  <footer>
+    <button class="btn ghost" id="back" type="button">← Voltar</button>
+    <div class="row" style="flex:0 0 auto;gap:10px">
+      <button class="btn ghost" id="fullscreen" type="button">⛶ Tela cheia</button>
+      <button class="btn" id="next" type="button">Começar →</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+const META = 36000; // meta de vendas do trimestre
+const BASE = {rec:10000, cus:8500};
+const ROUNDS = [
+  { mes:'Novembro', titulo:'Chegou a Black Friday!',
+    texto:'Todo mundo tá dando desconto. O que o Expresso Literário faz?',
+    op:[
+      {t:'50% de desconto em tudo', d:'Fila na porta, vende muito.', rec:16000, cus:15200,
+       lição:'Vendeu muito, mas quase não sobrou nada. Desconto grande demais acaba com a lucratividade.'},
+      {t:'15% só nos livros', d:'Promoção pensada, sem exagero.', rec:13000, cus:10900,
+       lição:'Vendeu bem e ainda lucrou. Desconto com estratégia protege a margem.'},
+      {t:'Sem desconto nenhum', d:'Mantém os preços normais.', rec:9000, cus:7800,
+       lição:'A margem ficou ok, mas os clientes foram pro concorrente. Vendeu menos que o normal e ficou longe da meta.'}
+    ]},
+  { mes:'Dezembro', titulo:'O preço do café subiu 30%',
+    texto:'O fornecedor aumentou o preço. E agora?',
+    op:[
+      {t:'Aumentar R$ 1 no cafezinho', d:'Repassa um pouco pro cliente.', rec:12500, cus:10300,
+       lição:'Um aumento pequeno cobriu o custo e o lucro até subiu. Olhar a lucratividade ajuda a decidir o preço.'},
+      {t:'Manter o preço', d:'O dono paga a diferença.', rec:12000, cus:11100,
+       lição:'As vendas continuaram iguais, mas o custo comeu o lucro. A loja vende o mesmo e ganha bem menos.'},
+      {t:'Trocar por um café mais barato', d:'Corta custo na qualidade.', rec:10500, cus:9000,
+       lição:'O custo caiu, mas os clientes reclamaram e alguns sumiram. Economizar na qualidade também tem preço.'}
+    ]},
+  { mes:'Janeiro', titulo:'Chuva de pedidos com entrega',
+    texto:'Muita gente quer receber livros em casa. Como dar conta?',
+    op:[
+      {t:'Contratar um entregador temporário', d:'Custa mais, mas entrega no prazo.', rec:15000, cus:12600,
+       lição:'Investiu, entregou no prazo e vendeu muito. É o que algumas empresas de entrega fazem: acompanham as entregas no prazo, e isso é eficácia.'},
+      {t:'Aceitar tudo sem reforço', d:'Promete e torce pra dar certo.', rec:11000, cus:9600,
+       lição:'Muitos atrasos, pedidos cancelados e cliente bravo. Prometer sem conseguir cumprir derruba a eficácia.'},
+      {t:'Só vender na loja', d:'Não faz entrega.', rec:10000, cus:8400,
+       lição:'Margem boa, mas perdeu um monte de venda. Ficou seguro, porém longe da meta.'}
+    ]}
+];
+
+const NOTES = {
+  capa:'Oi, gente! A gente é o grupo 1 e vai falar de dois KPIs: lucratividade e eficácia. Mas em vez de só explicar, vocês vão ser donos de uma loja hoje.',
+  pergunta:'Primeiro uma pergunta: uma loja vendeu 1 milhão. Ela lucrou muito? (espera responderem) Não dá pra saber! Depende de quanto ela gastou. É pra isso que serve um KPI.',
+  painel:'KPI é tipo o painel do carro da empresa. A gente vai olhar dois ponteiros. Lucratividade é quanto sobra no bolso depois de pagar tudo. Eficácia é se a empresa bateu a meta que planejou. Não confundam com eficiência, que é fazer gastando menos.',
+  rodada:'Turma, vocês decidem! Levanta a mão quem vota na A... na B... na C. A mais votada ganha.',
+  resultado:'Olha o que aconteceu com os ponteiros. (lê a explicação da tela) Viram como uma decisão muda o painel?',
+  final:'Esse foi o resultado da nossa loja. Repara que dá pra bater a meta e lucrar pouco, ou lucrar bem e não bater a meta. Por isso a empresa precisa olhar os dois juntos.',
+  real:'E isso acontece de verdade. Na DHL, onde eu trabalho, entrega no prazo é um indicador super importante. Supermercado lucra pouquinho em cada produto, mas vende muito. Então a lucratividade mostra se a empresa ganha dinheiro, e a eficácia mostra se ela cumpre o que planejou. Uma completa a outra. Obrigado!'
+};
+
+let state = {screen:0, picks:[], phase:'choose'};
+const SCREENS = ['capa','pergunta','painel','r0','r1','r2','final','real'];
+const $ = s => document.querySelector(s);
+const fmt = n => 'R$ ' + Math.round(n).toLocaleString('pt-BR');
+const pct = (n,d=1) => (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toLocaleString('pt-BR') + '%';
+
+function totals(upto){
+  let rec=0,cus=0;
+  state.picks.slice(0,upto).forEach((p,i)=>{const o=ROUNDS[i].op[p];rec+=o.rec;cus+=o.cus;});
+  return {rec,cus,luc:rec-cus,lucPct: rec? (rec-cus)/rec*100 : 0, efi: rec/META*100};
+}
+
+function gauge(kind,value,max,label,sub){
+  const color = kind==='luc' ? 'var(--luc)' : 'var(--efi)';
+  const frac = Math.max(0,Math.min(1,value/max));
+  const metaTick = kind==='efi' ? (()=>{const a=Math.PI*(1-100/max);return `<line class="tick" x1="${100+66*Math.cos(a)}" y1="${100-66*Math.sin(a)}" x2="${100+94*Math.cos(a)}" y2="${100-94*Math.sin(a)}"/>`;})() : '';
+  return `<div class="gauge">
+    <span class="lbl">${label}</span>
+    <svg viewBox="0 0 200 112" role="img" aria-label="${label}: ${pct(value)}">
+      <path class="track" d="M20 100 A80 80 0 0 1 180 100" pathLength="100"/>
+      <path class="fill" data-frac="${frac}" d="M20 100 A80 80 0 0 1 180 100" pathLength="100" stroke="${color}" stroke-dasharray="100" stroke-dashoffset="100"/>
+      ${metaTick}
+    </svg>
+    <div class="val" style="color:${color}">${pct(value)}</div>
+    <div class="sub">${sub}</div>
+  </div>`;
+}
+function animateGauges(){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.querySelectorAll('.gauge .fill').forEach(p=>p.style.strokeDashoffset = 100 - 100*parseFloat(p.dataset.frac));
+    document.querySelectorAll('.chart .b').forEach(b=>b.style.height=b.dataset.h);
+  }));
+}
+
+function panel(t){
+  return `<div class="gauges">
+    ${gauge('luc', t.lucPct, 25, 'Lucratividade', `Lucro ${fmt(t.luc)} de ${fmt(t.rec)} vendidos`)}
+    ${gauge('efi', t.efi, 120, 'Eficácia da meta', `Vendeu ${fmt(t.rec)} de ${fmt(META)} · risco branco = meta`)}
+  </div>`;
+}
+
+function render(){
+  const id = SCREENS[state.screen];
+  const el = $('#screen');
+  let html='', nextLabel='Avançar →', nextOk=true, noteKey=id;
+  if(id==='capa'){
+    html=`      <h1>Hoje vocês são donos de uma loja</h1>
+      <p class="lead">A gente vai mostrar dois KPIs, <span class="luc">lucratividade</span> e <span class="efi">eficácia</span>, jogando. A turma toma as decisões e o painel mostra o resultado.</p>
+      ${panel({rec:BASE.rec,cus:BASE.cus,luc:BASE.rec-BASE.cus,lucPct:15,efi:0})}`;
+    nextLabel='Começar →';
+  } else if(id==='pergunta'){
+    html=`<p class="eyebrow">Pergunta pra turma</p>
+      <h1>Uma loja vendeu R$ 1 milhão. Ela lucrou muito?</h1>
+      <p class="lead">Levanta a mão quem acha que sim.</p>
+      <div class="card step" style="max-width:900px"><h3>Resposta: não dá pra saber!</h3><p>Se ela gastou R$ 990 mil pra vender, sobrou só R$ 10 mil. Vender muito não é a mesma coisa que lucrar muito.</p></div>`;
+  } else if(id==='painel'){
+    html=`<p class="eyebrow">KPI = o painel do carro da empresa</p>
+      <h2>Os dois ponteiros que a gente vai olhar</h2>
+      <div class="row">
+        <div class="card step"><h3 class="luc">Lucratividade</h3>
+          <p>Quanto da venda virou lucro de verdade, depois de pagar todos os custos.</p>
+          <div class="formula"><span class="frac"><span>Lucro líquido</span><span>Receita total</span></span><span>× 100</span></div>
+          <p class="example">Vendeu <b>R$ 10.000</b> e sobrou <b>R$ 1.500</b> → <b>15%</b>. De cada R$ 10, sobra R$ 1,50.</p></div>
+        <div class="card step"><h3 class="efi">Eficácia</h3>
+          <p>Se a empresa chegou no resultado que planejou. É sobre bater a meta.</p>
+          <div class="formula"><span class="frac"><span>Resultado alcançado</span><span>Resultado planejado</span></span><span>× 100</span></div>
+          <p class="example">Meta de <b>1.000</b> entregas no prazo, fez <b>950</b> → <b>95%</b>. Não confundir com eficiência, que é gastar menos.</p></div>
+      </div>
+      <div class="card step"><p><b>O jogo:</b> o Expresso Literário (nossa cafeteria e livraria) tem a meta de vender <b>${fmt(META)}</b> em 3 meses. Hoje ela vende uns ${fmt(BASE.rec)} por mês com 15% de lucratividade. Vocês decidem o que fazer em cada situação.</p></div>`;
+    nextLabel='Jogar →';
+  } else if(id[0]==='r'){
+    const i = +id[1], R = ROUNDS[i];
+    const picked = state.picks[i];
+    if(picked===undefined){
+      noteKey='rodada';
+      html=`<div class="scenario"><p class="eyebrow">Mês ${i+1} de 3 · ${R.mes}</p><h2>${R.titulo}</h2><p class="lead">${R.texto}</p></div>
+        <div class="choices">${R.op.map((o,k)=>`<button class="choice" type="button" data-k="${k}" id="op${i}${k}"><span class="key">${'ABC'[k]}</span><span class="t">${o.t}</span><span class="d">${o.d}</span></button>`).join('')}</div>`;
+      nextOk=false; nextLabel='Avançar →';
+    } else {
+      noteKey='resultado';
+      const o=R.op[picked], luc=o.rec-o.cus, lp=luc/o.rec*100, cp=o.cus/o.rec*100;
+      const t=totals(i+1);
+      html=`<div class="scenario"><p class="eyebrow">Mês ${i+1} de 3 · ${R.mes}</p><h2>${R.titulo}</h2><p class="picked">Vocês escolheram <b>${'ABC'[picked]}: ${o.t}</b> · <a href="#" id="undo" style="color:var(--efi)">mudar escolha</a></p></div>
+        <div class="result">
+          <div class="month card">
+            <h3>Como foi o mês</h3>
+            <div class="money"><div><small>Vendeu</small><strong>${fmt(o.rec)}</strong></div><div><small>Gastou</small><strong>${fmt(o.cus)}</strong></div><div><small>Sobrou</small><strong class="luc">${fmt(luc)}</strong></div></div>
+            <div class="bar" role="img" aria-label="Custos ${pct(cp,0)} e lucro ${pct(lp)} da venda"><div class="c" style="width:${cp}%">Custos</div><div class="l" style="width:${lp}%">${pct(lp,0)}</div></div>
+            <p class="lesson">${o.lição}</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+            <p class="eyebrow" style="color:var(--muted)">Painel acumulado (${i+1} ${i?'meses':'mês'})</p>
+            ${panel(t)}
+          </div>
+        </div>`;
+      nextLabel = i<2 ? 'Próximo mês →' : 'Ver o resultado →';
+    }
+  } else if(id==='final'){
+    const t=totals(3);
+    const bateu=t.efi>=100, lucrou=t.lucPct>=12;
+    const v = bateu&&lucrou ? ['Empresa campeã','Bateu a meta e lucrou bem. Os dois ponteiros no verde.']
+      : bateu ? ['Bateu a meta, mas o lucro sumiu','Foi eficaz, mas pouco lucrativa. Vendeu muito e sobrou pouco.']
+      : lucrou ? ['Lucrou, mas não bateu a meta','Foi lucrativa, mas pouco eficaz. Ganhou bem em cada venda e ficou longe do planejado.']
+      : ['Sinal vermelho','Nem bateu a meta, nem lucrou bem. Hora de rever tudo.'];
+    const maxR=16000;
+    html=`<div class="verdict"><p class="eyebrow">Resultado do trimestre</p><h2>${v[0]}</h2><p class="lead">${v[1]}</p></div>
+      ${panel(t)}
+      <div class="row">
+        <div class="card"><h3>Mês a mês</h3>
+          <div class="chart">${state.picks.map((p,i)=>{const o=ROUNDS[i].op[p];return `<div class="m"><div class="b rec" data-h="${o.rec/maxR*100}%" style="height:0"><span>${(o.rec/1000).toLocaleString('pt-BR')} mil</span></div><div class="b luc" data-h="${(o.rec-o.cus)/maxR*100}%" style="height:0"><span>${((o.rec-o.cus)/1000).toLocaleString('pt-BR')} mil</span></div></div>`}).join('')}</div>
+          <div class="chart-x">${ROUNDS.map(r=>`<span>${r.mes}</span>`).join('')}</div>
+          <div class="legend"><span><i style="background:var(--efi)"></i>Vendas</span><span><i style="background:var(--luc)"></i>Lucro</span></div>
+        </div>
+        <div class="card"><h3>Onde a nossa loja caiu</h3>
+          <div class="matrix">
+            <div class="${bateu&&lucrou?'me':''}"><b>Campeã</b>bateu a meta e lucrou</div>
+            <div class="${bateu&&!lucrou?'me':''}"><b>Eficaz, pouco lucrativa</b>vendeu muito, sobrou pouco</div>
+            <div class="${!bateu&&lucrou?'me':''}"><b>Lucrativa, pouco eficaz</b>lucrou, mas longe da meta</div>
+            <div class="${!bateu&&!lucrou?'me':''}"><b>Sinal vermelho</b>os dois ponteiros baixos</div>
+          </div>
+        </div>
+      </div>`;
+  } else if(id==='real'){
+    html=`<p class="eyebrow">Na vida real</p><h2>Quem usa esses indicadores</h2>
+      <div class="real">
+        <div class="card"><span class="tag luc">Lucratividade</span><h3>Supermercados</h3><p>Lucram pouco em cada produto (a margem costuma ficar perto de 2% a 3%) e compensam vendendo em grande quantidade.</p></div>
+        <div class="card"><span class="tag luc">Lucratividade</span><h3>Empresas na bolsa</h3><p>Ambev, Magazine Luiza e Natura divulgam a margem de lucro todo trimestre. Investidor olha isso pra saber se a empresa vai bem.</p></div>
+        <div class="card"><span class="tag efi">Eficácia</span><h3>DHL e a logística</h3><p>Acompanha a porcentagem de entregas feitas no prazo. No fim de ano o volume aumenta muito e esse número vira prioridade.</p></div>
+        <div class="card"><span class="tag efi">Eficácia</span><h3>iFood</h3><p>Mede se o pedido chega no tempo prometido. Se a meta não é batida, investiga onde travou: restaurante, entregador ou trânsito.</p></div>
+      </div>
+      <div class="card"><p><span class="luc"><b>Lucratividade</b></span> mostra se a empresa ganha dinheiro. <span class="efi"><b>Eficácia</b></span> mostra se ela cumpre o que planejou. Uma completa a outra.</p></div>`;
+    nextLabel='Jogar de novo ↺';
+  }
+  el.innerHTML = `<div class="fade" style="display:flex;flex-direction:column;gap:24px">${html}</div>`;
+  const nx=$('#next'); nx.textContent=nextLabel; nx.disabled=!nextOk;
+  $('#back').disabled = state.screen===0;
+  $('#steps').innerHTML = SCREENS.map((s,i)=>`<i class="${i<=state.screen?'on':''}"></i>`).join('');
+  el.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.k)));
+  const u=$('#undo'); if(u) u.addEventListener('click',e=>{e.preventDefault();const i=+id[1];state.picks=state.picks.slice(0,i);render();});
+  animateGauges();
+}
+function pick(k){
+  const id=SCREENS[state.screen]; if(id[0]!=='r') return;
+  const i=+id[1]; if(state.picks[i]!==undefined) return;
+  state.picks[i]=k; render();
+}
+function reveal(){ const s=document.querySelector('#screen .step:not(.shown)'); if(s){s.classList.add('shown'); if(window.innerWidth<900){try{s.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}} return true;} return false; }
+function next(){
+  if($('#next').disabled) return;
+  if(reveal()) return;
+  if(SCREENS[state.screen]==='real'){state={screen:0,picks:[],phase:'choose'};render();return;}
+  state.screen=Math.min(SCREENS.length-1,state.screen+1); render(); window.scrollTo(0,0);
+}
+function back(){ if(state.screen>0){state.screen--; render();} }
+$('#next').addEventListener('click',next);
+$('#back').addEventListener('click',back);
+$('#fullscreen').addEventListener('click',()=>{
+  const d=document, el=d.documentElement;
+  try{
+    if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}
+    else{const r=(el.requestFullscreen||el.webkitRequestFullscreen).call(el);if(r&&r.catch)r.catch(()=>{$('#fullscreen').textContent='Use Ctrl + para aumentar';});}
+  }catch(e){$('#fullscreen').textContent='Use Ctrl + para aumentar';}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.closest && e.target.closest('input,textarea')) return;
+  const k=e.key.toLowerCase();
+  if(k==='arrowright'||k==='pagedown'||k===' '){e.preventDefault();next();}
+  else if(k==='arrowleft'||k==='pageup'){back();}
+  else if(['a','b','c'].includes(k)){pick('abc'.indexOf(k));}
+});
+function start(data){ if(data && data.state) state=data.state; render(); }
+start({});
+</script>
+</body>
+</html>

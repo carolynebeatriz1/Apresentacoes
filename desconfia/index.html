@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<title>Desconfia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: zooming canvas (Prezi style), frames spread on a dark "radar" field, camera flies between them */
+:root{
+  --ink:#050B24; --panel:#0E1A42; --panel2:#14244F; --blue:#2F6BFF; --cyan:#3FC3FF; --deep:#1B3FD1;
+  --text:#FFFFFF; --muted:#8EA3CC; --red:#FF4D5E; --green:#2ED47A; --line:#22356b;
+  --font:'Montserrat',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--ink);color:var(--text);font-family:var(--font)}
+#stage{position:fixed;inset:0;overflow:hidden;background:radial-gradient(circle at 30% 20%,#10285e 0%,var(--ink) 55%);cursor:pointer}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
+#world svg{shape-rendering:geometricPrecision}
+#world.anim{transition:transform .75s cubic-bezier(.65,0,.35,1)}
+.grid{position:absolute;left:-7000px;top:-7000px;width:14000px;height:14000px;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:200px 200px;opacity:.25;pointer-events:none}
+.frame{position:absolute;width:1700px;height:960px;box-sizing:border-box;padding:90px 110px;border-radius:56px;
+  background:linear-gradient(160deg,rgba(20,36,79,.92),rgba(5,11,36,.94));border:3px solid rgba(63,195,255,.35);
+  box-shadow:0 40px 120px rgba(0,0,0,.5);display:grid;grid-template-columns:1fr auto;gap:80px;align-items:center}
+.frame.solo{grid-template-columns:1fr}
+.kicker{font-size:30px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);margin:0 0 18px}
+h2{font-size:84px;line-height:1.05;font-weight:800;margin:0 0 30px;letter-spacing:-.02em;text-wrap:balance}
+p.lead{font-size:36px;line-height:1.45;color:#C9D6F2;font-weight:500;margin:0 0 36px;max-width:22em}
+.items{display:flex;flex-direction:column;gap:26px}
+.item{display:flex;gap:26px;align-items:flex-start}
+.badge{flex:none;width:76px;height:76px;border-radius:24px;display:grid;place-items:center;font-weight:800;font-size:34px;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));color:#fff}
+.badge svg{width:40px;height:40px}
+.item b{display:block;font-size:38px;font-weight:800;margin-bottom:4px}
+.item span{font-size:30px;color:var(--muted);font-weight:500;line-height:1.35}
+.chips{display:flex;flex-wrap:wrap;gap:16px}
+.chip{font-size:28px;font-weight:600;padding:14px 26px;border-radius:999px;border:2px solid rgba(255,77,94,.6);color:#FFD9DD;background:rgba(255,77,94,.1)}
+.phones{display:flex;gap:40px}
+/* phone mockup */
+.phone{width:340px;height:700px;border-radius:52px;background:#02061a;padding:12px;box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 0 0 2px #2a3a6a;flex:none}
+.scr{width:100%;height:100%;border-radius:42px;background:var(--ink);overflow:hidden;position:relative;padding:44px 18px 18px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;font-size:13px}
+.scr .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:14px;background:#02061a}
+.row{display:flex;align-items:center;gap:10px}
+.sp{flex:1}
+.card{background:var(--panel);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.dot{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;color:#fff}
+.tg{width:38px;height:22px;border-radius:11px;background:var(--blue);position:relative;flex:none}
+.tg::after{content:"";position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+.hero{background:linear-gradient(135deg,var(--blue),var(--deep));border-radius:20px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pill{font-size:10px;font-weight:700;padding:5px 10px;border-radius:999px;background:#fff;color:var(--deep)}
+.muted{color:var(--muted)}
+.nav{position:absolute;left:0;right:0;bottom:0;height:58px;background:#0A1433;display:flex;justify-content:space-around;align-items:center;font-size:10px;color:var(--muted);font-weight:600}
+.nav i{display:block;width:6px;height:6px;border-radius:50%;background:#2A3A6A;margin:0 auto 4px}
+.nav .on{color:#fff}.nav .on i{background:var(--cyan)}
+.btn{border-radius:12px;padding:11px;text-align:center;font-weight:700;font-size:13px;background:linear-gradient(135deg,var(--cyan),var(--blue))}
+.bubble{background:#1F2C4F;border-radius:14px;padding:12px;line-height:1.45;font-size:13px}
+.alert{background:#2A0F1A;border:2px solid var(--red);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:9px}
+.x{color:var(--red);font-weight:800;margin-right:6px}
+.tt{padding:0;background:#000}
+.tt-video{position:absolute;inset:0 0 54px;background:radial-gradient(circle at 50% 35%,#1d3a82,#050B24 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 54px 90px 14px}
+.tt-shot{position:relative;transform:rotate(-4deg)}
+.tt-sms{background:#F2F4F8;border-radius:14px;padding:10px;width:190px;display:flex;flex-direction:column;gap:6px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.tt-bubble{background:#E3E7EF;color:#111;border-radius:10px;padding:8px;font-size:10px;line-height:1.4}
+.tt-stamp{position:absolute;right:-18px;bottom:-14px;transform:rotate(-14deg);border:4px solid var(--red);color:var(--red);font-weight:800;font-size:24px;letter-spacing:.12em;padding:2px 10px;border-radius:8px;background:rgba(255,255,255,.9)}
+.tt-cap span,.tt-cap2 span{display:inline;background:#fff;color:#000;font-weight:800;padding:3px 8px;border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone;line-height:1.7}
+.tt-cap{font-size:17px;text-align:center;margin-top:8px}
+.tt-cap2{font-size:11px;text-align:center}.tt-cap2 span{background:var(--red);color:#fff}
+.tt-top{position:absolute;top:44px;left:0;right:0;display:flex;justify-content:center;gap:16px;font-size:13px;font-weight:700;color:rgba(255,255,255,.6)}
+.tt-top b{color:#fff;border-bottom:2px solid #fff;padding-bottom:3px}
+.tt-rail{position:absolute;right:8px;bottom:140px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.tt-rail small{display:block;font-size:9px;font-weight:700;margin-top:2px}
+.tt-av{position:relative;width:42px;height:42px;border-radius:50%;background:#050B24;border:2px solid #fff;display:grid;place-items:center;margin-bottom:6px}
+.tt-av i{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:16px;height:16px;border-radius:50%;background:#FE2C55;font-style:normal;font-size:12px;font-weight:800;line-height:16px}
+.tt-info{position:absolute;left:12px;right:60px;bottom:68px;font-size:10.5px;line-height:1.4;display:flex;flex-direction:column;gap:4px}
+.tt-info>b{font-size:12px}
+.tt-music{font-size:10px;opacity:.85}
+.tt-prog{position:absolute;left:0;right:0;bottom:54px;height:2px;background:rgba(255,255,255,.25)}.tt-prog i{display:block;width:42%;height:100%;background:#fff}
+.tt-nav{position:absolute;left:0;right:0;bottom:0;height:54px;background:#000;display:flex;justify-content:space-around;align-items:center;font-size:9px;font-weight:600;color:rgba(255,255,255,.75)}
+.tt-plus{width:36px;height:22px;border-radius:7px;background:#fff;color:#000;display:grid;place-items:center;font-size:16px;font-weight:800;box-shadow:-3px 0 0 #25F4EE,3px 0 0 #FE2C55}
+/* identity */
+.appicon-wrap{display:flex;flex-direction:column;align-items:center;gap:22px}
+.appicon{width:420px;height:420px;border-radius:96px;display:grid;place-items:center;position:relative;overflow:hidden;
+  background:#050B24;border:2px solid rgba(63,195,255,.25);
+  box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.appicon svg{position:relative}
+.applabel{font-size:46px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.logoCard{background:#fff;border-radius:40px;padding:60px 70px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.word{font-weight:800;letter-spacing:-.03em;line-height:1}
+.word em{font-style:normal;color:var(--cyan)}
+.logoCard .word{color:#0B2E7A}.logoCard .word em{color:var(--blue)}
+.sw{display:flex;gap:18px;flex-wrap:wrap}
+.sw div{width:104px}
+.sw i{display:block;height:104px;border-radius:24px;margin-bottom:10px}
+.sw small{font-size:20px;color:var(--muted);font-weight:600}
+.ring{position:absolute;left:-3600px;top:-3600px;width:7200px;height:7200px;pointer-events:none}
+.center{position:absolute;left:-1000px;top:-650px;width:2000px;height:1300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:60px}
+.cmain{display:flex;flex-direction:column;align-items:center;gap:26px;transition:opacity .6s}
+.slog{font-size:36px;letter-spacing:.22em;color:#9DB4DA;font-weight:600}
+.ribbon{display:grid;grid-template-columns:1fr 1.3fr 1.3fr;gap:50px;width:1900px;box-sizing:border-box;padding:50px 60px;border-radius:44px;background:rgba(14,26,66,.9);border:3px solid rgba(63,195,255,.35);transition:opacity .6s}
+.ribbon h3{margin:0 0 12px;font-size:26px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-weight:700}
+.ribbon p{margin:0;font-size:34px;line-height:1.35;font-weight:600;color:#E3EBFF}
+.thanks{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;visibility:hidden;transition:opacity .6s}
+.show-thanks .thanks{opacity:1;visibility:visible}
+.show-thanks .cmain,.show-thanks .ribbon{opacity:0}
+.topicnum{position:absolute;top:-46px;left:90px;font-size:28px;font-weight:800;letter-spacing:.15em;padding:14px 28px;border-radius:999px;background:linear-gradient(135deg,var(--cyan),var(--blue))}
+@media (orientation:portrait){.ribbon{grid-template-columns:1fr;width:1100px}.center{left:-650px;width:1300px;top:-1300px;height:2600px}}
+/* hud */
+#hud{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:12px;align-items:center;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));pointer-events:none}
+#hud button{pointer-events:auto;font:700 15px var(--font);color:#fff;background:rgba(14,26,66,.85);border:1px solid rgba(63,195,255,.4);border-radius:999px;padding:10px 18px;cursor:pointer;backdrop-filter:blur(6px)}
+#hud button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+#count{pointer-events:none;font-size:13px;color:var(--muted);font-weight:600;min-width:56px;text-align:center}
+@media (orientation:portrait){
+  .frame{width:1000px !important;height:1560px;grid-template-columns:1fr;padding:80px 70px;gap:50px;align-content:center;justify-items:center}
+  .frame>div:first-child{justify-self:stretch}
+  h2{font-size:76px}
+}
+@media (max-width:520px){#hud{gap:6px}#hud button{font-size:13px;padding:8px 12px}#count{min-width:40px}}
+@media (prefers-reduced-motion:reduce){#world.anim{transition:none}}
+</style>
+
+<div id="stage">
+ <div id="world">
+  <div class="grid"></div>
+  <svg class="ring" viewBox="-3600 -3600 7200 7200" aria-hidden="true">
+   <defs><path id="arc" d="M0,-3350 a3350,3350 0 1,1 -0.1,0"/></defs>
+   <circle r="2950" fill="none" stroke="#3FC3FF" stroke-opacity=".35" stroke-width="6" stroke-dasharray="60 40"/>
+   <circle r="3150" fill="none" stroke="#2F6BFF" stroke-opacity=".25" stroke-width="3"/>
+   <circle r="1250" fill="none" stroke="#3FC3FF" stroke-opacity=".2" stroke-width="4"/>
+   <text font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="110" fill="#3FC3FF" fill-opacity=".28" letter-spacing="30"><textPath href="#arc">NA DÚVIDA, DESCONFIA ✦ PROTEÇÃO CONTRA GOLPES ✦ WHATSAPP · SMS · E-MAIL · INSTAGRAM ✦ NA DÚVIDA, DESCONFIA ✦ PROTEÇÃO CONTRA GOLPES ✦</textPath></text>
+  </svg>
+  <div id="center" class="center">
+   <div class="cmain">
+    <svg width="340" height="374" viewBox="0 0 200 220"><use href="#shield"/></svg>
+    <div class="word" style="font-size:190px">Des<em>confia</em></div>
+    <div class="slog">NA DÚVIDA, DESCONFIA.</div>
+   </div>
+   <div class="ribbon">
+    <div><h3>Nome</h3><p class="word" style="font-size:44px">Des<em>confia</em></p></div>
+    <div><h3>O que é</h3><p>Um aplicativo que protege o celular inteiro contra golpes por mensagem</p></div>
+    <div><h3>Público-alvo</h3><p>Quem usa celular, principalmente idosos, quem compra pela internet e famílias</p></div>
+   </div>
+   <div class="thanks">
+    <svg width="260" height="286" viewBox="0 0 200 220"><use href="#shield"/></svg>
+    <div style="font-size:84px;font-weight:800">Na dúvida,</div>
+    <div class="word" style="font-size:150px">Des<em>confia</em></div>
+    <div style="font-size:42px;color:var(--muted);font-weight:700;letter-spacing:.2em">OBRIGADO!</div>
+   </div>
+  </div>
+
+  
+
+  <!-- 2 PROBLEMA -->
+  <section class="frame" data-x="2300" data-y="-1300" data-r="-4">
+   <span class="topicnum">01</span>
+   <div>
+    <p class="kicker">O problema</p>
+    <h2>Golpes por mensagem</h2>
+    <p class="lead">Todo dia chega um golpe novo no celular. A mensagem parece de verdade, com logo e tudo. Quem mais sofre são os idosos, que acreditam e acabam pagando.</p>
+    <div class="chips"><span class="chip">Encomenda retida</span><span class="chip">Dívida no CPF</span><span class="chip">E-mail falso</span><span class="chip">Promoção falsa</span></div>
+   </div>
+   <div class="phone"><div class="scr"><div class="notch"></div>
+     <div class="row"><div class="dot" style="background:#5A6B8F">?</div><div><b>+55 11 9XXXX-4471</b><div class="muted" style="font-size:10px">SMS</div></div></div>
+     <div class="bubble">Sua encomenda está retida na alfândega. Para liberar, pague a taxa de R$ 12,90 até hoje: entrega-rastreio.net/pagar</div>
+     <div class="bubble">Consta uma dívida no seu CPF. Regularize agora e evite o bloqueio do seu nome: serasa-acordo.top</div>
+     <div class="bubble">PARABÉNS! Você ganhou um cupom de R$ 500. Resgate em até 1 hora 👉 promo-loja.click</div>
+   </div></div>
+  </section>
+
+  <!-- 3 SOLUÇÃO -->
+  <section class="frame" data-x="4500" data-y="0" data-r="3" style="width:2100px">
+   <span class="topicnum">02</span>
+   <div>
+    <p class="kicker">A solução</p>
+    <h2>Um escudo pro celular inteiro</h2>
+    <div class="items">
+     <div class="item"><div class="badge">1</div><div><b>Analisa com IA</b><span>Uma inteligência artificial confere o que chega no WhatsApp, SMS, e-mail e Instagram.</span></div></div>
+     <div class="item"><div class="badge">2</div><div><b>Avisa</b><span>Se for golpe, mostra um aviso vermelho em cima da mensagem.</span></div></div>
+     <div class="item"><div class="badge">3</div><div><b>Aprende</b><span>A IA aprende com cada denúncia e pega até golpe novo.</span></div></div>
+    </div>
+   </div>
+   <div class="phones">
+    <div class="phone"><div class="scr" style="background:#0B1530"><div class="notch"></div>
+     <div class="row"><div class="dot" style="background:#5A6B8F">?</div><div><b>+55 11 9XXXX-4471</b><div class="muted" style="font-size:10px">número desconhecido</div></div></div>
+     <div class="bubble">Sua encomenda está retida. Pague a taxa de R$ 12,90 até hoje: entrega-rastreio.net/pagar</div>
+     <div class="alert">
+      <div class="row"><div class="dot" style="background:var(--red)">!</div><div><b style="font-size:15px">Cuidado! Isso é golpe</b><div style="font-size:10px;color:#FFB3BB">Desconfia analisou essa mensagem</div></div></div>
+      <div style="color:#FFD9DD"><span class="x">✕</span>O link não é de transportadora oficial</div>
+      <div style="color:#FFD9DD"><span class="x">✕</span>Pede pagamento com urgência</div>
+      <div style="color:#FFD9DD"><span class="x">✕</span>Número denunciado por 312 pessoas</div>
+      <div class="btn" style="background:var(--red)">Bloquear e denunciar</div>
+      <div class="btn" style="background:var(--panel2)">Ignorar aviso</div>
+     </div>
+    </div></div>
+    <div class="phone"><div class="scr"><div class="notch"></div>
+     <b style="font-size:20px">Recebeu algo estranho?</b>
+     <div class="muted">Cole a mensagem ou o link e a gente confere.</div>
+     <div class="card" style="background:var(--panel2);border:1px solid rgba(47,107,255,.5);color:#C9D6F2">Você tem uma dívida no seu CPF. Regularize agora: serasa-acordo.top/cpf</div>
+     <div class="btn">Verificar agora</div>
+     <div class="card">
+      <div class="row"><div class="dot" style="background:var(--red)">!</div><div><b style="color:var(--red);font-size:15px">Golpe detectado</b><div class="muted" style="font-size:11px">97% de chance de ser golpe</div></div></div>
+      <div style="height:7px;border-radius:4px;background:#2A3A6A"><div style="width:97%;height:100%;border-radius:4px;background:var(--red)"></div></div>
+      <div><b>Site falso</b><div class="muted">imita um órgão de crédito</div></div>
+      <div><b>Link recém-criado</b><div class="muted">o site tem só 3 dias</div></div>
+     </div>
+     <div class="nav"><div><i></i>Início</div><div class="on"><i></i>Verificar</div><div><i></i>Família</div><div><i></i>Perfil</div></div>
+    </div></div>
+   </div>
+  </section>
+
+  
+
+  <!-- 5 DIFERENCIAL -->
+  <section class="frame" data-x="1600" data-y="2700" data-r="4">
+   <span class="topicnum">03</span>
+   <div>
+    <p class="kicker">Nosso diferencial</p>
+    <h2>Hoje cada app se protege sozinho. O Desconfia protege tudo junto.</h2>
+    <div class="items">
+     <div class="item"><div class="badge" style="background:var(--panel2);color:var(--muted)">✕</div><div><b style="color:var(--muted)">O que já existe</b><span>Filtro só no e-mail, aviso só no SMS, antivírus pago que quase ninguém usa.</span></div></div>
+     <div class="item"><div class="badge">✓</div><div><b>Desconfia</b><span>WhatsApp, SMS, e-mail e Instagram num app só, com um aviso que até a vó entende.</span></div></div>
+    </div>
+   </div>
+   <div class="phone"><div class="scr"><div class="notch"></div>
+    <div class="row"><svg width="26" height="29" viewBox="0 0 200 220"><use href="#shield"/></svg><div class="word" style="font-size:18px">Des<em>confia</em></div><div class="sp"></div><div class="dot" style="background:var(--panel2)">C</div></div>
+    <div class="muted">Oi, Carol!</div>
+    <div class="hero"><svg width="52" height="57" viewBox="0 0 200 220"><use href="#shield"/></svg><b style="font-size:17px">Você está protegida</b><div style="color:#D6E4FF;font-size:12px">Seu celular está sendo monitorado contra golpes.</div><span class="pill">● Proteção ativa</span></div>
+    <div class="row"><div class="card" style="flex:1;gap:2px"><b style="font-size:22px;color:var(--cyan)">128</b><span class="muted" style="font-size:11px">golpes bloqueados</span></div><div class="card" style="flex:1;gap:2px"><b style="font-size:22px;color:var(--cyan)">34</b><span class="muted" style="font-size:11px">links verificados</span></div></div>
+    <b>Apps protegidos</b>
+    <div class="card">
+     <div class="row"><div class="dot" style="background:#25D366">W</div><b>WhatsApp</b><div class="sp"></div><div class="tg"></div></div>
+     <div class="row"><div class="dot" style="background:#3FC3FF">S</div><b>SMS</b><div class="sp"></div><div class="tg"></div></div>
+     <div class="row"><div class="dot" style="background:#FF8A3D">E</div><b>E-mail</b><div class="sp"></div><div class="tg"></div></div>
+     <div class="row"><div class="dot" style="background:#E1306C">I</div><b>Instagram</b><div class="sp"></div><div class="tg"></div></div>
+    </div>
+    <div class="nav"><div class="on"><i></i>Início</div><div><i></i>Verificar</div><div><i></i>Família</div><div><i></i>Perfil</div></div>
+   </div></div>
+  </section>
+
+  <!-- 6 DINHEIRO -->
+  <section class="frame" data-x="-700" data-y="2200" data-r="-3">
+   <span class="topicnum">04</span>
+   <div>
+    <p class="kicker">Como ganha dinheiro</p>
+    <h2>Três fontes de receita</h2>
+    <div class="items">
+     <div class="item"><div class="badge">R$</div><div><b>Plano Família</b><span>O básico é grátis. Por R$ 9,90/mês protege você e mais 3 pessoas da família.</span></div></div>
+     <div class="item"><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><path d="M3 10l9-6 9 6M5 10v8M19 10v8M9 10v8M15 10v8M3 20h18"/></svg></div><div><b>Empresas parceiras</b><span>Bancos, transportadoras e lojas pagam pra proteger os clientes delas.</span></div></div>
+     <div class="item"><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div><div><b>Operadoras</b><span>Vivo, Claro e TIM oferecem o Desconfia junto com o plano.</span></div></div>
+    </div>
+   </div>
+   <div class="phone"><div class="scr"><div class="notch"></div>
+    <b style="font-size:19px">Proteja quem você ama</b>
+    <div class="muted">Cuide do celular de até 3 pessoas.</div>
+    <div class="card" style="background:#0F2A2A;border:1px solid rgba(46,212,122,.6)"><div class="row"><div class="dot" style="background:var(--green)">✓</div><span style="color:#D3F7E4;font-weight:600">A Vó Maria recebeu um golpe hoje, mas o Desconfia bloqueou a tempo.</span></div></div>
+    <div class="card">
+     <div class="row"><div class="dot" style="background:#8B5CF6">M</div><div><b>Mãe</b><div class="muted" style="font-size:10px">2 golpes bloqueados</div></div><div class="sp"></div><span class="pill" style="background:#123A2A;color:var(--green)">Protegida</span></div>
+     <div class="row"><div class="dot" style="background:#F59E0B">V</div><div><b>Vó Maria</b><div class="muted" style="font-size:10px">2 golpes bloqueados</div></div><div class="sp"></div><span class="pill" style="background:#123A2A;color:var(--green)">Protegida</span></div>
+     <div class="row"><div class="dot" style="background:#10B981">P</div><div><b>Pai</b><div class="muted" style="font-size:10px">2 golpes bloqueados</div></div><div class="sp"></div><span class="pill" style="background:#123A2A;color:var(--green)">Protegido</span></div>
+    </div>
+    <div class="hero" style="text-align:left;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#D6E4FF;letter-spacing:.1em">DESCONFIA FAMÍLIA</span><b style="font-size:22px">R$ 9,90/mês</b><span style="color:#D6E4FF;font-size:12px">Você e mais 3 pessoas protegidas.</span></div>
+    <div class="nav"><div><i></i>Início</div><div><i></i>Verificar</div><div class="on"><i></i>Família</div><div><i></i>Perfil</div></div>
+   </div></div>
+  </section>
+
+  <!-- 7 DIVULGAÇÃO -->
+  <section class="frame" data-x="-2600" data-y="400" data-r="3">
+   <span class="topicnum">05</span>
+   <div>
+    <p class="kicker">Divulgação</p>
+    <h2>Mostrar o golpe antes que ele chegue</h2>
+    <div class="items">
+     <div class="item"><div class="badge"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div><div><b>TikTok e Reels</b><span>Vídeos “você cairia nessa?” com golpes reais.</span></div></div>
+     <div class="item"><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></div><div><b>Influenciadores</b><span>Criadores de tecnologia e finanças mostrando o app.</span></div></div>
+     <div class="item"><div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v4"/></svg></div><div><b>Palestras pra idosos</b><span>Junto com bancos parceiros e CRAS. Lá mesmo a família já instala o app.</span></div></div>
+    </div>
+   </div>
+   <div class="phone"><div class="scr tt"><div class="notch"></div>
+    <div class="tt-video">
+     <div class="tt-shot">
+      <div class="tt-sms">
+       <div class="row" style="gap:6px"><div class="dot" style="width:20px;height:20px;font-size:9px;background:#5A6B8F">?</div><b style="font-size:10px;color:#111">+55 11 9XXXX-4471</b></div>
+       <div class="tt-bubble">Sua encomenda está retida. Pague a taxa de R$ 12,90 pra liberar: entrega-rastreio.net</div>
+      </div>
+      <div class="tt-stamp">GOLPE</div>
+     </div>
+     <div class="tt-cap"><span>você cairia nessa? 👀</span></div>
+     <div class="tt-cap2"><span>transportadora NÃO cobra taxa por link</span></div>
+    </div>
+    <div class="tt-top"><span>Seguindo</span><b>Para você</b></div>
+    <div class="tt-rail">
+     <div class="tt-av"><svg width="30" height="33" viewBox="0 0 200 220"><use href="#shield"/></svg><i>+</i></div>
+     <div><svg viewBox="0 0 24 24" width="30" height="30" fill="#FF4D5E"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.6 4.5c2.2 0 3.6 1.3 4.4 2.6.8-1.3 2.2-2.6 4.4-2.6 3.6 0 5.7 3.9 4.2 7.3C19.5 16.4 12 21 12 21z"/></svg><small>12,4 mil</small></div>
+     <div><svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M12 3C6.5 3 2 6.9 2 11.6c0 2.6 1.4 5 3.7 6.5L5 21.5l4.1-2.2c.9.2 1.9.3 2.9.3 5.5 0 10-3.9 10-8.6S17.5 3 12 3z"/></svg><small>860</small></div>
+     <div><svg viewBox="0 0 24 24" width="30" height="30" fill="#FFC83D"><path d="M6 3h12a1 1 0 011 1v17l-7-4.5L5 21V4a1 1 0 011-1z"/></svg><small>2,1 mil</small></div>
+     <div><svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M13 4l9 8-9 8v-5c-6 0-9.5 1.8-11 5 .5-6 3.8-10.5 11-11.5V4z"/></svg><small>3 mil</small></div>
+    </div>
+    <div class="tt-info">
+     <b>@desconfia.app</b>
+     <div>3 golpes que chegam todo dia no seu celular. Salva e manda pra sua vó! <b>#golpe #dica #desconfia</b></div>
+     <div class="tt-music">♫ som original · Desconfia</div>
+    </div>
+    <div class="tt-prog"><i></i></div>
+    <div class="tt-nav"><span>Início</span><span>Amigos</span><span class="tt-plus">+</span><span>Caixa</span><span>Perfil</span></div>
+   </div></div>
+  </section>
+
+  <!-- 8 IDENTIDADE -->
+  <section class="frame" data-x="-2300" data-y="-1500" data-r="-4">
+   <span class="topicnum">06</span>
+   <div>
+    <p class="kicker">Identidade visual</p>
+    <h2>Azul pra passar confiança, com um olho atento</h2>
+    <div class="sw">
+     <div><i style="background:#3FC3FF"></i><small>Ciano</small></div>
+     <div><i style="background:#2F6BFF"></i><small>Azul</small></div>
+     <div><i style="background:#1B3FD1"></i><small>Azul forte</small></div>
+     <div><i style="background:#050B24;box-shadow:inset 0 0 0 2px #2a3a6a"></i><small>Marinho</small></div>
+     <div><i style="background:#FF4D5E"></i><small>Alerta</small></div>
+    </div>
+    <p class="lead" style="margin-top:34px;margin-bottom:0">Fonte <b style="color:#fff">Montserrat</b>: moderna e fácil de ler.<br>Slogan: <b style="color:#fff">“Na dúvida, Desconfia.”</b></p>
+   </div>
+   <div class="appicon-wrap">
+    <div class="appicon"><svg viewBox="0 0 200 220" width="290" height="319"><use href="#shield"/></svg></div>
+    <div class="applabel">Desconfia</div>
+   </div>
+  </section>
+
+  
+ </div>
+</div>
+
+
+
+<div id="hud">
+ <button id="prev" type="button" aria-label="Voltar">‹ Voltar</button>
+ <span id="count"></span>
+ <button id="next" type="button" aria-label="Avançar">Avançar ›</button>
+ <button id="all" type="button">Visão geral</button>
+</div>
+
+<script>
+(()=>{
+ // logo: drawn inline in every spot (Safari blurs/drops masks referenced through <use>)
+ const LOGO=(id)=>`<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FC3FF"/><stop offset=".55" stop-color="#2F6BFF"/><stop offset="1" stop-color="#1B3FD1"/></linearGradient></defs>
+  <path d="M100 30 L162 52 Q170 55 170 64 V106 C170 150 140 178 104 194 Q100 196 96 194 C60 178 30 150 30 106 V64 Q30 55 38 52Z" fill="url(#${id})"/>
+  <path d="M50 108 Q100 62 150 108 Q100 154 50 108Z" fill="#050B24"/>
+  <circle cx="108" cy="108" r="22" fill="url(#${id})"/><circle cx="108" cy="108" r="8" fill="#050B24"/>
+  <path d="M100 8 L180 36 Q188 39 188 48 V106 C188 162 150 196 104 214 Q100 216 96 214 C50 196 12 162 12 106 V48 Q12 39 20 36Z" fill="none" stroke="url(#${id})" stroke-width="7" stroke-linecap="round" stroke-dasharray="120 16 220 16 260 16" stroke-dashoffset="40"/>`;
+ document.querySelectorAll('use[href="#shield"]').forEach((u,k)=>{u.parentNode.innerHTML=LOGO('lg'+k);});
+ const world=document.getElementById('world'), stage=document.getElementById('stage');
+ const frames=[...document.querySelectorAll('.frame')];
+ const center=document.getElementById('center');
+ const TILT=[-5,4,-4,5,-3,4];
+ function place(){const portrait=matchMedia('(orientation:portrait)').matches;const R=portrait?3000:2950;
+  frames.forEach((f,k)=>{const w=f.offsetWidth,h=f.offsetHeight;const a=(-90+k*360/frames.length)*Math.PI/180;
+   const x=Math.round(Math.cos(a)*R),y=Math.round(Math.sin(a)*R),r=TILT[k%TILT.length];
+   f.style.left=(x-w/2)+'px';f.style.top=(y-h/2)+'px';f.style.transform=`rotate(${r}deg)`;f._c={x,y,w,h,r};});
+  center._c={x:0,y:0,w:center.offsetWidth,h:center.offsetHeight,r:0};}
+ function bbox(){let a=1e9,b=1e9,c=-1e9,d=-1e9;[...frames,center].forEach(f=>{const k=f._c;a=Math.min(a,k.x-k.w/2);b=Math.min(b,k.y-k.h/2);c=Math.max(c,k.x+k.w/2);d=Math.max(d,k.y+k.h/2);});return{x:(a+c)/2,y:(b+d)/2,w:c-a,h:d-b,r:0};}
+ function sub(f){const el=f.querySelector(':scope > .phones, :scope > .phone');if(!el)return null;
+  const dx=el.offsetLeft+el.offsetWidth/2-f.offsetWidth/2,dy=el.offsetTop+el.offsetHeight/2-f.offsetHeight/2,a=f._c.r*Math.PI/180;
+  return{x:f._c.x+dx*Math.cos(a)-dy*Math.sin(a),y:f._c.y+dx*Math.sin(a)+dy*Math.cos(a),w:el.offsetWidth,h:el.offsetHeight,r:f._c.r};}
+ const steps=()=>[bbox(),center._c,...frames.flatMap(f=>{const p=sub(f);return p?[f._c,p]:[f._c];}),center._c];
+ let i=0, cam=null, timer=null;
+ function camFor(t){const W=stage.clientWidth,H=stage.clientHeight-70;const s=Math.min(W/(t.w*1.12),H/(t.h*1.16));return{x:t.x,y:t.y,s,r:t.r};}
+ function apply(c){world.style.transform=`translate(${stage.clientWidth/2}px,${(stage.clientHeight-70)/2}px) scale(${c.s}) rotate(${-c.r}deg) translate(${-c.x}px,${-c.y}px)`;cam=c;}
+ function go(n,instant){const st=steps();i=Math.max(0,Math.min(st.length-1,n));const target=camFor(st[i]);
+  document.getElementById('count').textContent=`${i+1} / ${st.length}`;stage.classList.toggle('show-thanks',i===st.length-1);
+  clearTimeout(timer);
+  if(instant||!cam||matchMedia('(prefers-reduced-motion: reduce)').matches){world.classList.remove('anim');apply(target);return;}
+  world.classList.add('anim');
+  const dist=Math.hypot(target.x-cam.x,target.y-cam.y);
+  if(dist>600){const mid={x:(cam.x+target.x)/2,y:(cam.y+target.y)/2,r:(cam.r+target.r)/2,s:Math.min(cam.s,target.s,camFor(bbox()).s*1.4)*.75};
+   apply(mid);timer=setTimeout(()=>apply(target),750);}else apply(target);}
+ // repaint after each zoom so text and logo render crisp at the final scale (iPhone keeps a blurry layer otherwise)
+ world.addEventListener('transitionend',e=>{if(e.target!==world)return;world.style.opacity='.999';requestAnimationFrame(()=>{world.style.opacity='';});});
+ const next=()=>go(i+1), prev=()=>go(i-1);
+ document.getElementById('next').onclick=e=>{e.stopPropagation();next()};
+ document.getElementById('prev').onclick=e=>{e.stopPropagation();prev()};
+ document.getElementById('all').onclick=e=>{e.stopPropagation();go(0)};
+ stage.addEventListener('click',e=>{(e.clientX<stage.clientWidth*0.3)?prev():next()});
+ addEventListener('keydown',e=>{if(['ArrowRight','ArrowDown',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();next()}else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev()}else if(e.key==='Escape'||e.key==='Home')go(0)});
+ let tx=null;stage.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+ stage.addEventListener('touchend',e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?next():prev();e.preventDefault();}tx=null});
+ function init(){place();go(i,true);}
+ addEventListener('resize',()=>{place();go(i,true)});
+ (document.fonts?document.fonts.ready:Promise.resolve()).then(init);init();
+})();
+</script>
+
+
+</html>
